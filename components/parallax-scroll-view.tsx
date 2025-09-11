@@ -43,15 +43,18 @@ export default function ParallaxScrollView({
   return (
     <Animated.ScrollView
       ref={scrollRef}
+      style={{ flex: 1, backgroundColor: '#000' }}
+      contentContainerStyle={{ flexGrow: 1 }}
       scrollEventThrottle={16}>
       <Animated.View
         style={[
           styles.header,
+          { backgroundColor: '#000' },
           headerAnimatedStyle,
         ]}>
         {headerTitle}
       </Animated.View>
-      <ThemedView style={styles.content}>{children}</ThemedView>
+      <ThemedView style={[styles.content, { backgroundColor: '#000', flex: 1 }]}>{children}</ThemedView>
     </Animated.ScrollView>
   );
 }
