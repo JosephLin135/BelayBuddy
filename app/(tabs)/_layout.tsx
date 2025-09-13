@@ -15,20 +15,21 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: { backgroundColor: '#000' },
+        tabBarStyle: { backgroundColor: '#FFF' },
+        tabBarLabelStyle: { color: '#000'},
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Beta Assistant',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="brain.head.profile.fill" color={color} />,
+          tabBarIcon: () => <IconSymbol size={28} name="brain.head.profile.fill" color='#000' />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Route Setting',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="mappin.and.ellipse.circle" color={color} />,
+          tabBarIcon: () => <IconSymbol size={28} name="mappin.and.ellipse.circle" color='#000' />,
         }}
       />
     </Tabs>

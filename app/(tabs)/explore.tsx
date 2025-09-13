@@ -11,16 +11,18 @@ import { Fonts } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { Button, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 export default function TabTwoScreen() {
   const router = useRouter();
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor:'#fff' }}>
+      <StatusBar style='dark'/>
       <View style={styles.titleContainer}>
         <ThemedText type="title" style={ styles.headerTitle}>
-          BelayBuddy
+          RouteVision
         </ThemedText>
-        <Button title="Sign In" onPress={() => router.push('/(auth)/sign-in')} />
+        <Button title="Sign In" onPress={() => router.push('/(auth)/route-sign-in')} />
       </View>
       <View>
         <ThemedText style={styles.description}>AI Route Setting</ThemedText>
@@ -42,7 +44,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 35,
     fontFamily: Fonts.rounded,
-    color: '#fff',
+    color: '#000',
     paddingTop: 15,
   },
   description: {
@@ -50,5 +52,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 10,
+    color: '#000',
   }
 });
