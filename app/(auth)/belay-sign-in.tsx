@@ -2,6 +2,7 @@ import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import { StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React from 'react'
+import { Fonts } from '@/constants/theme'
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
@@ -48,7 +49,7 @@ export default function Page() {
         elevation: 4,
         alignItems: 'center'
       }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: '#222' }}>BelayBuddy</Text>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', fontFamily: Fonts.rounded, marginBottom: 24, color: '#222' }}>BelayBuddy</Text>
         <TextInput
           autoCapitalize="none"
           value={emailAddress}
@@ -89,7 +90,7 @@ export default function Page() {
           onPress={onSignInPress}
           style={{
             width: '100%',
-            backgroundColor: '#3b82f6',
+            backgroundColor: '#000',
             paddingVertical: 14,
             borderRadius: 8,
             alignItems: 'center',
@@ -100,7 +101,7 @@ export default function Page() {
         <View style={{ width: '100%', alignItems: 'center', marginTop: 8 }}>
           <Text style={{ color: '#888', marginBottom: 8 }}>Don't have an account?</Text>
           <Link href="/sign-up">
-            <Text style={{ color: '#3b82f6', fontWeight: 'bold' }}>Sign up</Text>
+            <Text style={{ color: '#000', fontWeight: 'bold' }}>Sign up</Text>
           </Link>
         </View>
       </View>

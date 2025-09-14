@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Modal, Platform, StyleSheet, TextInput, TouchableOpacity, Text, FlatList } from 'react-native';
+import { Modal, Platform, StyleSheet, TextInput, TouchableOpacity, Text, FlatList, Alert } from 'react-native';
 import { SignedIn } from '@clerk/clerk-expo';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -35,6 +35,32 @@ export default function HomeScreen() {
   const deleteRoute = (idx: number) => {
     setRoutes(routes.filter((_, i) => i !== idx));
   };
+
+  // Add confirmation before deleting
+  const confirmDeleteRoute = (idx: number) => {
+    Alert.alert(
+      'Delete Route',
+      'Are you sure you want to delete this route?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteRoute(idx) },
+      ]
+    );
+  };
+
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (permission.granted) {
+      const result = await ImagePicker.launchCameraAsync({
+        quality: 1,
+        allowsEditing: true,
+      });
+      if (!result.canceled && result.assets.length > 0) {
+        setNewImage(result.assets[0].uri);
+      }
+    }
+  };
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -53,14 +79,14 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.headerTitle}>
           BelayBuddy
         </ThemedText>
-        <Button title="Sign In" onPress={() => router.push('/(auth)/belay-sign-in')} />
+        <Button color="#000" title="Sign In" onPress={() => router.push('/(auth)/belay-sign-in')} />
       </View>
       <View>
         <ThemedText style={styles.description}>AI Beta Assistant</ThemedText>
       </View>
       <View style={styles.header}>
         <Text style={styles.title}>My Routes Log</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
           <Text style={styles.addButtonText}>＋ Add</Text>
         </TouchableOpacity>
       </View>
@@ -72,7 +98,7 @@ export default function HomeScreen() {
             <Text style={styles.routeText}>{item}</Text>
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => deleteRoute(index)}
+              onPress={() => confirmDeleteRoute(index)}
             >
               <Text style={styles.deleteButtonText}>Delete</Text>
             </TouchableOpacity>
@@ -81,34 +107,42 @@ export default function HomeScreen() {
         ListEmptyComponent={<Text style={styles.emptyText}>No routes yet. Add one!</Text>}
         contentContainerStyle={{ flexGrow: 1 }}
       />
-      <Modal visible={modalVisible} animationType="slide" transparent>
+      <Modal visible={modalVisible} animationType="fade" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add a Route</Text>
+            <Text style={styles.modalTitle}>Add a Climb</Text>
             <TextInput
               value={newRoute}
               onChangeText={setNewRoute}
-              placeholder="Route name or description"
+              placeholder="Route Name"
               style={styles.input}
               placeholderTextColor="#888"
             />
-            <TouchableOpacity style={styles.saveButton} onPress={pickImage}>
-              <Text style={styles.saveButtonText}>
-                {newImage ? 'Change Image' : 'Pick Image'}
-              </Text>
-            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+                <Text style={styles.imageText}>Take Photo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                <Text style={styles.imageText}>
+                  {newImage ? 'Change Image' : 'Pick Image'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             {newImage && (
               <Image
                 source={{ uri: newImage }}
                 style={{ width: 100, height: 100, borderRadius: 12, marginVertical: 8 }}
               />
             )}
-            <TouchableOpacity style={styles.saveButton} onPress={addRoute}>
+            <View style={{ flexDirection: 'row', gap: 110}}>
+            <TouchableOpacity style={styles.cancelText} onPress={addRoute}>
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -127,6 +161,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 35,
     fontFamily: Fonts.rounded,
+    fontWeight: 900,
     color: '#000',
     paddingTop: 15,
   },
@@ -136,6 +171,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 5,
     color: '#000',
+    fontWeight: 800,
   },
   header: {
     flexDirection: 'row',
@@ -146,11 +182,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: Fonts.rounded,
+    fontWeight: 900,
     color: '#222',
   },
+  addButton: {
+    backgroundColor: '#000',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 10,
+  },
   addButtonText: {
-    color: '#000',
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -182,27 +226,39 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#f6f7f9',
+    borderColor: '#222',
+    backgroundColor: '#fff',
     padding: 12,
     marginBottom: 16,
     fontSize: 16,
     color: '#222',
   },
+  imageText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  imageButton: {
+    backgroundColor: '#000',
+    borderRadius: 8,
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
   saveButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#000',
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 10,
     marginBottom: 8,
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
     fontSize: 16,
   },
   cancelText: {
-    color: '#3b82f6',
+    color: '#000',
     fontWeight: 'bold',
     fontSize: 16,
     marginTop: 8,
