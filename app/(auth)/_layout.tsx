@@ -1,16 +1,23 @@
-import { Redirect, Stack } from 'expo-router'
+import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useAuth } from '@clerk/clerk-expo'
 
 export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth()
+  const params = useLocalSearchParams()
 
   if (isSignedIn) {
-    return <Redirect href={'/(tabs)/explore'} />
+    if (params.from === 'belay') {
+      return <Redirect href="../tabs/index" />
+    }
+    // Default to explore if from=route or anything else
+    return <Redirect href="/explore" />
   }
 
-  return <Stack
+  return (
+    <Stack
       screenOptions={{
-        headerShown: false, // This hides the top header for all auth screens
+        headerShown: false,
       }}
     />
+  )
 }

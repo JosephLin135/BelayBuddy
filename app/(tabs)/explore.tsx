@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 
+
 export default function TabTwoScreen() {
   const router = useRouter();
   const grades = [
@@ -24,15 +25,18 @@ export default function TabTwoScreen() {
     'V12⇾V14',
   ];
 
+  // State for selected grade, modal visibility, route description, and saved routes
   const [selectedGrades, setSelectedGrades] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [routeDescription, setRouteDescription] = useState('');
   const [routes, setRoutes] = useState<{ grade: string, description: string }[]>([]);
 
+  // Handle grade selection from the horizontal scroll bar
   const handleGradePress = (grade: string) => {
     setSelectedGrades(grade);
   };
 
+  // Add a new route to the list if both grade and description are provided
   const handleAddRoute = () => {
     if (selectedGrades && routeDescription.trim()) {
       setRoutes([...routes, { grade: selectedGrades, description: routeDescription.trim() }]);
@@ -41,6 +45,7 @@ export default function TabTwoScreen() {
     setRouteDescription('');
   };
 
+  // Remove a route by index
   const deleteRoute = (idx: number) => {
     setRoutes(routes.filter((_, i) => i !== idx));
   };
@@ -82,6 +87,7 @@ export default function TabTwoScreen() {
           ))}
         </ScrollView>
         <View style={{ padding: 20 }}>
+          {/* Header for selected grade and add route button */}
           {selectedGrades && (
             <View style={{
               flexDirection: 'row',
@@ -115,6 +121,7 @@ export default function TabTwoScreen() {
                     <Text style={{ color: '#222', fontWeight: 'bold' }}>Description:</Text>
                     <Text style={{ color: '#222' }}>{route.description}</Text>
                   </View>
+                  {/* Delete button for each route */}
                   <TouchableOpacity
                     style={styles.smallDeleteButton}
                     onPress={() => confirmDeleteRoute(idx)}
@@ -141,12 +148,18 @@ export default function TabTwoScreen() {
               numberOfLines={6}
               textAlignVertical='top'
             />
-            <View style={{flexDirection: 'row', justifyContent: 'center', gap: 16}}>
-              <TouchableOpacity style={styles.addButton} onPress={handleAddRoute}>
-                <Text style={styles.addButtonText}>Save</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16 }}>
+              <TouchableOpacity style={styles.saveButton} onPress={handleAddRoute}>
+                <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(false)}>
-                <Text style={styles.addButtonText}>Cancel</Text>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  setRouteDescription('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -264,5 +277,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  saveButton: {
+    backgroundColor: '#799FCB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#F9665E',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

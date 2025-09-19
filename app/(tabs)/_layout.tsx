@@ -1,6 +1,5 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
@@ -16,20 +15,32 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: { backgroundColor: '#FFF' },
-        tabBarLabelStyle: { color: '#000'},
+        tabBarLabelStyle: { color: '#000' },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Beta Assistant',
-          tabBarIcon: () => <IconSymbol size={28} name="brain.head.profile.fill" color='#000' />,
+          tabBarIcon: ({ focused }) => (
+            <IconSymbol
+              size={28}
+              name="brain.head.profile.fill"
+              color={focused ? '#000' : '#d1d5db'} // gray when focused
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Route Setting',
-          tabBarIcon: () => <IconSymbol size={28} name="mappin.and.ellipse.circle" color='#000' />,
+          tabBarIcon: ({ focused }) => (
+            <IconSymbol
+              size={28}
+              name="mappin.and.ellipse.circle"
+              color={focused ? '#000' : '#d1d5db'} // gray when focused
+            />
+          ),
         }}
       />
     </Tabs>
