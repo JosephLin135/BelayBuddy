@@ -56,7 +56,7 @@ export default function Page() {
       {/* Back button */}
       <TouchableOpacity onPress={() => router.back()} 
         style={{ position: 'absolute', top: 75, left: 20, zIndex: 1 }}>
-        <Text style={{ color: '#000', fontSize: 18 }}>← Back</Text>
+        <Text style={{ color: '#27526A', fontSize: 18 }}>← Back</Text>
       </TouchableOpacity>
       <View style={{
         width: '90%',
@@ -70,7 +70,7 @@ export default function Page() {
         elevation: 4,
         alignItems: 'center'
       }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: '#222' }}>RouteVision</Text>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: '#27526A' }}>RouteVision</Text>
         <View style={{ flexDirection: 'row', width: '100%', marginBottom: 16 }}>
         <TextInput
           value={firstName}
@@ -194,18 +194,18 @@ export default function Page() {
           onPress={onSignUpPress}
           style={{
             width: '100%',
-            backgroundColor: '#000',
+            backgroundColor: '#e1dbcb',
             paddingVertical: 14,
             borderRadius: 8,
             alignItems: 'center',
             marginBottom: 16
           }}>
-          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sign Up</Text>
+          <Text style={{ color: '#27526A', fontWeight: 'bold', fontSize: 16 }}>Sign Up</Text>
         </TouchableOpacity>
         <View style={{ width: '100%', alignItems: 'center', marginTop: 8 }}>
           <Text style={{ color: '#888', marginBottom: 8 }}>Have an account?</Text>
           <Link href="/route-sign-in">
-            <Text style={{ color: '#000', fontWeight: 'bold' }}>Sign In</Text>
+            <Text style={{ color: '#27526A', fontWeight: 'bold' }}>Sign In</Text>
           </Link>
         </View>
       </View>

@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Modal, Platform, StyleSheet, Touchable, Alert } from 'react-native';
+import { Modal, Platform, StyleSheet, Touchable, Alert, ActionSheetIOS } from 'react-native';
 import { SignedIn } from '@clerk/clerk-expo';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -25,11 +25,13 @@ export default function TabTwoScreen() {
     'V12⇾V14',
   ];
 
-  // State for selected grade, modal visibility, route description, and saved routes
+  // State for selected grade, modal visibility, route description, saved routes, and enlarged description
   const [selectedGrades, setSelectedGrades] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [routeDescription, setRouteDescription] = useState('');
-  const [routes, setRoutes] = useState<{ grade: string, description: string }[]>([]);
+  const [routes, setRoutes] = useState<{ grade: string, gradeLevel: string, description: string }[]>([]);
+  const [enlargedDescription, setEnlargedDescription] = useState<string | null>(null);
+  const [selectedGradeLevel, setSelectedGradeLevel] = useState('0'); // For grade selection in modal
 
   // Handle grade selection from the horizontal scroll bar
   const handleGradePress = (grade: string) => {
@@ -38,11 +40,29 @@ export default function TabTwoScreen() {
 
   // Add a new route to the list if both grade and description are provided
   const handleAddRoute = () => {
-    if (selectedGrades && routeDescription.trim()) {
-      setRoutes([...routes, { grade: selectedGrades, description: routeDescription.trim() }]);
+    if (!selectedGrades) {
+      Alert.alert('Select a grade range first!');
+      return;
     }
+    if (!routeDescription.trim()) {
+      Alert.alert('Please enter a description.');
+      return;
+    }
+    if (selectedGradeLevel === '0') {
+      Alert.alert('Please select a grade level.');
+      return;
+    }
+    setRoutes([
+      ...routes,
+      {
+        grade: selectedGrades,
+        gradeLevel: selectedGradeLevel,
+        description: routeDescription.trim()
+      }
+    ]);
     setModalVisible(false);
     setRouteDescription('');
+    setSelectedGradeLevel('0');
   };
 
   // Remove a route by index
@@ -56,10 +76,33 @@ export default function TabTwoScreen() {
       'Delete Route',
       'Are you sure you want to delete this route?',
       [
-        { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: () => deleteRoute(idx) },
+        { text: 'Cancel', style: 'cancel' },
       ]
     );
+  };
+
+  // Grade selection for modal (similar to index.tsx)
+  const handleGradeSelect = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: Array.from({ length: 15 }, (_, i) => `V${i}`),
+        },
+        (buttonIndex) => {
+          setSelectedGradeLevel(buttonIndex.toString());
+        }
+      );
+    } else {
+      Alert.alert(
+        'Select Grade',
+        '',
+        Array.from({ length: 15 }, (_, i) => ({
+          text: `V${i}`,
+          onPress: () => setSelectedGradeLevel(i.toString()),
+        }))
+      );
+    }
   };
 
   return (
@@ -69,7 +112,7 @@ export default function TabTwoScreen() {
         <ThemedText type="title" style={ styles.headerTitle}>
           RouteVision
         </ThemedText>
-        <Button color='#000'  title="Sign In" onPress={() => router.push('/(auth)/route-sign-in')} />
+        <Button color='#47526a'  title="Sign In" onPress={() => router.push('/(auth)/route-sign-in')} />
       </View>
       <View>
         <ThemedText style={styles.description}>AI Route Setting</ThemedText>
@@ -95,16 +138,22 @@ export default function TabTwoScreen() {
               justifyContent: 'space-between',
               marginBottom: 12,
             }}>
-              <Text style={{ color: '#222', fontWeight: 'bold'}}>{selectedGrades} Routes</Text>
-              <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+              <Text style={{ color: '#47526a', fontWeight: 'bold'}}>{selectedGrades} Routes</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => {
+                  if (!selectedGrades) setSelectedGrades(grades[0]);
+                  setModalVisible(true);
+                }}
+              >
                 <Text style={styles.addButtonText}>＋ New Route</Text>
               </TouchableOpacity>
             </View>
           )}
           {/* Show saved routes for the selected grade */}
-          {routes.filter(r => r.grade === selectedGrades).length > 0 && (
+          {routes.filter(r => !selectedGrades || r.grade === selectedGrades).length > 0 && (
             <View style={{ marginTop: 8 }}>
-              {routes.filter(r => r.grade === selectedGrades).map((route, idx) => (
+              {routes.filter(r => !selectedGrades || r.grade === selectedGrades).map((route, idx) => (
                 <View
                   key={idx}
                   style={{
@@ -118,8 +167,16 @@ export default function TabTwoScreen() {
                   }}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#222', fontWeight: 'bold' }}>Description:</Text>
-                    <Text style={{ color: '#222' }}>{route.description}</Text>
+                    <Text style={{ color: '#222', fontWeight: 'bold' }}>
+                      Grade: V{route.gradeLevel}
+                    </Text>
+                    <TouchableOpacity onPress={() => setEnlargedDescription(route.description)}>
+                      <Text style={{ color: '#222', textDecorationLine: 'underline' }}>
+                        {route.description.length > 40
+                          ? route.description.slice(0, 40) + '...'
+                          : route.description}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                   {/* Delete button for each route */}
                   <TouchableOpacity
@@ -134,6 +191,7 @@ export default function TabTwoScreen() {
           )}
         </View>
       </View>
+      {/* Modal for adding a new route */}
       <Modal visible={modalVisible} animationType="fade" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -148,6 +206,22 @@ export default function TabTwoScreen() {
               numberOfLines={6}
               textAlignVertical='top'
             />
+            {/* Grade selection button */}
+            <TouchableOpacity
+              onPress={handleGradeSelect}
+              style={{
+                marginBottom: 10,
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                backgroundColor: '#47526a',
+                alignSelf: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                {selectedGradeLevel ? `Grade: V${selectedGradeLevel}` : 'Select Grade'}
+              </Text>
+            </TouchableOpacity>
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16 }}>
               <TouchableOpacity style={styles.saveButton} onPress={handleAddRoute}>
                 <Text style={styles.saveButtonText}>Save</Text>
@@ -157,6 +231,7 @@ export default function TabTwoScreen() {
                 onPress={() => {
                   setModalVisible(false);
                   setRouteDescription('');
+                  setSelectedGradeLevel('0');
                 }}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -164,6 +239,34 @@ export default function TabTwoScreen() {
             </View>
           </View>
         </View>
+      </Modal>
+      {/* Modal for enlarged description */}
+      <Modal visible={!!enlargedDescription} transparent animationType="fade">
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          activeOpacity={1}
+          onPress={() => setEnlargedDescription(null)}
+        >
+          <View style={{
+            backgroundColor: '#fff',
+            borderRadius: 10,
+            padding: 24,
+            maxWidth: 350,
+            width: '90%',
+            maxHeight: 400,
+            alignItems: 'center'
+          }}>
+            <Text style={{ color: '#222', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Description</Text>
+            <ScrollView>
+              <Text style={{ color: '#222', fontSize: 16 }}>{enlargedDescription}</Text>
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
       </Modal>
       <ParallaxScrollView>
       </ParallaxScrollView>
@@ -183,7 +286,7 @@ const styles = StyleSheet.create({
     fontSize: 35,
     fontFamily: Fonts.rounded,
     fontWeight: 900,
-    color: '#000',
+    color: '#47526a',
     paddingTop: 15,
   },
   description: {
@@ -192,7 +295,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontFamily: Fonts.rounded,
     paddingTop: 10,
-    color: '#000',
+    color: '#47526a',
     fontWeight: 800,
   },
   navBar: {
@@ -200,7 +303,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   navItem: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#e1dbcb',
     borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 8,
@@ -208,18 +311,18 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#222',
+    color: '#47526a',
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#000',
-    borderRadius: 8,
+    backgroundColor: '#e1dbcb',
+    borderRadius: 6,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginTop: 10,
+    paddingVertical: 6,
+    marginTop: 6,
   },
   addButtonText: {
-    color: '#fff',
+    color: '#47526a',
     fontWeight: 'bold',
     fontSize: 16,
   },

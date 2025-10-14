@@ -16,7 +16,7 @@ export default function ProfileSetup() {
           firstName,
           lastName,
         })
-        router.replace('/') // Go to home or wherever you want
+        router.replace('..') // Go to home or wherever you want
       } else {
         console.error('User is not defined.')
       }

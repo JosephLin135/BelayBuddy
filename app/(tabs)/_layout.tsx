@@ -14,7 +14,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: { backgroundColor: '#FFF' },
+        tabBarStyle: { backgroundColor: '#f8f6f2' },
         tabBarLabelStyle: { color: '#000' },
       }}>
       <Tabs.Screen
@@ -25,7 +25,20 @@ export default function TabLayout() {
             <IconSymbol
               size={28}
               name="brain.head.profile.fill"
-              color={focused ? '#000' : '#d1d5db'} // gray when focused
+              color={focused ? '#47526a' : '#d1d5db'}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen 
+        name="chat"
+        options={{
+          title: 'BoulderTalk',
+          tabBarIcon: ({ focused }) => (
+            <IconSymbol
+              size={28}
+              name="quote.bubble.fill"
+              color={focused ? '#47526a' : '#d1d5db'}
             />
           ),
         }}
@@ -38,7 +51,7 @@ export default function TabLayout() {
             <IconSymbol
               size={28}
               name="mappin.and.ellipse.circle"
-              color={focused ? '#000' : '#d1d5db'} // gray when focused
+              color={focused ? '#47526a' : '#d1d5db'}
             />
           ),
         }}

@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { Slot, Stack } from 'expo-router'
-import { tokenCache } from '@/app/tokenCache' 
+import { tokenCache } from './tokenCache'
 
 export default function RootLayout() {
   const colorScheme = useColorScheme()

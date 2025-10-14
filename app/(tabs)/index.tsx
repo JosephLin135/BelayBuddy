@@ -14,12 +14,13 @@ import { Button, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { Redirect } from 'expo-router';
 
 export default function HomeScreen() {
   const router = useRouter();
 
   // State for routes, modal, form fields, error, editing, etc.
-  const [routes, setRoutes] = useState<{ name: string; image?: string }[]>([]);
+  const [routes, setRoutes] = useState<{ name: string; image?: string; grade?: string }[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newRoute, setNewRoute] = useState('');
   const [newImage, setNewImage] = useState<string | undefined>(undefined);
@@ -27,6 +28,9 @@ export default function HomeScreen() {
   const [searchText, setSearchText] = useState('');
   const [error, setError] = useState('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState(''); // State for selected grade
+
+  
 
   // Save or update a route (called when Save is pressed)
   const handleSaveRoute = () => {
@@ -38,12 +42,12 @@ export default function HomeScreen() {
     if (editIndex !== null) {
       // Edit mode: update existing route
       const updatedRoutes = [...routes];
-      updatedRoutes[editIndex] = { name: newRoute.trim(), image: newImage };
+      updatedRoutes[editIndex] = { name: newRoute.trim(), image: newImage, grade: selectedGrade };
       setRoutes(updatedRoutes);
       setEditIndex(null);
     } else {
       // Add mode: add new route
-      setRoutes([...routes, { name: newRoute.trim(), image: newImage }]);
+      setRoutes([...routes, { name: newRoute.trim(), image: newImage, grade: selectedGrade }]);
     }
     setNewRoute('');
     setNewImage(undefined);
@@ -55,6 +59,7 @@ export default function HomeScreen() {
     setEditIndex(idx);
     setNewRoute(routes[idx].name);
     setNewImage(routes[idx].image);
+    setSelectedGrade(routes[idx].grade ?? '');
     setModalVisible(true);
     setError('');
   };
@@ -152,6 +157,29 @@ export default function HomeScreen() {
     route.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // Handle grade selection
+  const handleGradeSelect = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: Array.from({ length: 15 }, (_, i) => `V${i}`),
+        },
+        (buttonIndex) => {
+          setSelectedGrade(buttonIndex.toString());
+        }
+      );
+    } else {
+      Alert.alert(
+        'Select Grade',
+        '',
+        Array.from({ length: 15 }, (_, i) => ({
+          text: `V${i}`,
+          onPress: () => setSelectedGrade(i.toString()),
+        }))
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
       <StatusBar style='dark'/>
@@ -160,7 +188,7 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.headerTitle}>
           BelayBuddy
         </ThemedText>
-        <Button color="#000" title="Sign In" onPress={() => router.push('/(auth)/belay-sign-in')} />
+        <Button color="#47526a" title="Sign In" onPress={() => router.push('/(auth)/belay-sign-in')} />
       </View>
       {/* Description text */}
       <View>
@@ -196,14 +224,13 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={{
                 marginLeft: 8,
-                backgroundColor: '#000',
+                backgroundColor: '#47526a',
                 borderRadius: 8,
                 paddingHorizontal: 16,
                 paddingVertical: 10,
               }}
-              onPress={() => {}} // Optional: add search icon or feedback
             >
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Search</Text>
+              <Text style={{ color: '#f8f6f2', fontWeight: 'bold', fontSize: 16 }}>Search</Text>
             </TouchableOpacity>
           </View>
           <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
@@ -228,8 +255,13 @@ export default function HomeScreen() {
                 />
               </TouchableOpacity>
             )}
-            {/* Route name */}
-            <Text style={styles.routeText}>{item.name}</Text>
+            {/* Route name and grade */}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.routeText}>{item.name}</Text>
+              <Text style={{ color: '#666', fontSize: 14 }}>
+                Grade: {item.grade !== undefined && item.grade !== '' ? `V${item.grade}` : 'Not set'}
+              </Text>
+            </View>
             {/* Edit and Delete buttons */}
             <TouchableOpacity
               style={[styles.editButton, { marginRight: 8 }]}
@@ -287,6 +319,24 @@ export default function HomeScreen() {
                 style={{ width: 100, height: 100, borderRadius: 4, marginVertical: 8 }}
               />
             )}
+
+            {/* Grade selection button */}
+            <TouchableOpacity
+              onPress={handleGradeSelect}
+              style={{
+                marginBottom: 10,
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                backgroundColor: '#47526a',
+                alignSelf: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                {selectedGrade ? `Grade: V${selectedGrade}` : 'Select Grade'}
+              </Text>
+            </TouchableOpacity>
+
             {/* Save and Cancel buttons */}
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 25, marginTop: 8 }}>
               <TouchableOpacity onPress={handleSaveRoute}>
@@ -337,12 +387,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 5,
+    color: 'f8f6f2',
   },
   headerTitle: {
     fontSize: 35,
     fontFamily: Fonts.rounded,
     fontWeight: 900,
-    color: '#000',
+    color: '#47526a',
     paddingTop: 15,
   },
   description: {
@@ -350,7 +401,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 5,
-    color: '#000',
+    color: '#47526a',
     fontWeight: 800,
   },
   header: {
@@ -364,17 +415,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: Fonts.rounded,
     fontWeight: 900,
-    color: '#222',
+    color: '#47526a',
   },
   addButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#47526a',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginTop: 10,
   },
   addButtonText: {
-    color: '#fff',
+    color: '#f8f6f2',
     fontWeight: 'bold',
     fontSize: 16,
   },
